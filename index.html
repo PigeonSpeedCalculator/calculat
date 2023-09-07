@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Pigeon Speed Calculator</title>
+  <title>Pigeons Speed Calculator</title>
   <style>
     body {
       background-color: white;
@@ -110,7 +110,6 @@
       color: red;
     }
 
-    /* توسيط الزر */
     .center-button {
       display: flex;
       justify-content: center;
@@ -119,9 +118,9 @@
 </head>
 <body>
   <div>
-    <h1>Pigeon Speed Calculator</h1>
+    <h1>Pigeons Speed Calculator</h1>
     <form>
-      <label for="name">Rider's Name:</label>
+      <label for="name">Name:</label>
       <input type="text" id="name">
       <label for="start-time">Pigeon Release Time:</label>
       <input type="text" id="start-time" pattern="\d{2}:\d{2}:\d{2}" placeholder="HH:MM:SS">
@@ -132,27 +131,76 @@
       <button type="button" onclick="calculateSpeed()">Calculate Speed</button>
     </form>
   </div>
-  <br>
-  <div>
-    <h2>Race Results:</h2>
-    <div class="center-button"> <!-- توسيط الزر هنا -->
-      <button type="button" onclick="sortTableBySpeed()">Sort by Speed</button>
-    </div>
-    <table id="results">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Rider's Name</th>
-          <th>Speed (m/min)</th>
-          <th>Delete</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <div class="center-button">
+    <button type="button" onclick="sortTableBySpeed()">Sort by Speed</button>
   </div>
+  <table id="results">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Name</th>
+        <th>Speed (m/min)</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
   <script>
-    // ... الجزء السابق من الكود هنا ...
+    const data = [];
+
+    function timeDiff(start, end) {
+      const startTime = moment("1970-01-01T" + start + ".000Z", "YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+      const endTime = moment("1970-01-01T" + end + ".000Z", "YYYY-MM-DDTHH:mm:ss.SSS[Z]");
+      return endTime.diff(startTime);
+    }
+
+    function calculateSpeed() {
+      const name = document.getElementById("name").value;
+      const startTime = document.getElementById("start-time").value;
+      const endTime = document.getElementById("end-time").value;
+      const distance = document.getElementById("distance").value;
+
+      const speed = ((distance * 1000) / (timeDiff(startTime, endTime) / 60000)).toFixed(2);
+
+      data.push({ name, speed });
+
+      updateTable();
+    }
+
+    function deleteRow(index) {
+      data.splice(index, 1);
+      updateTable();
+    }
+
+    function updateTable() {
+      const table = document.getElementById("results").querySelector("tbody");
+      table.innerHTML = "";
+      data.forEach((row, index) => {
+        const newRow = table.insertRow(index);
+        const rankCell = newRow.insertCell(0);
+        const nameCell = newRow.insertCell(1);
+        const speedCell = newRow.insertCell(2);
+        const deleteCell = newRow.insertCell(3);
+
+        rankCell.innerHTML = index + 1;
+        nameCell.innerHTML = row.name;
+        speedCell.innerHTML = row.speed;
+
+        const deleteButton = document.createElement("button");
+        deleteButton.innerText = "Delete";
+        deleteButton.className = "delete-button";
+        deleteButton.onclick = function() {
+          deleteRow(index);
+        };
+        deleteCell.appendChild(deleteButton);
+      });
+    }
+
+    function sortTableBySpeed() {
+      data.sort((a, b) => b.speed - a.speed);
+      updateTable();
+    }
   </script>
 </body>
 </html>
